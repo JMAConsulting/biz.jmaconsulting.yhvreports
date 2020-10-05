@@ -6,6 +6,12 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
 
   public function __construct() {
     parent::__construct();
+    $this->_columns['civicrm_activity']['filters']['duration'] = [
+      'title' => ts('Duration (In Hours)'),
+      'dbAlias' => 'civicrm_activity_duration_total',
+      'operatorType' => CRM_Report_Form::OP_INT,
+      'type' => CRM_Utils_Type::T_INT,
+    ];
   }
   
   /**
@@ -47,10 +53,184 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     ];
     $statistics['counts']['duration'] = [
       'title' => ts('Total Duration (in Hours)'),
-      'value' => round($totalDuration / 60),
+      'value' => round(($totalDuration / 60), 2),
     ];
     return $statistics;
   }
+  
+  /**
+   * Generate where clause.
+   *
+   * @param bool $durationMode
+   */
+  public function where($durationMode = FALSE) {
+    $optionGroupClause = '';
+    if (!$durationMode) {
+      $optionGroupClause = 'civicrm_option_group.name = "activity_type" AND ';
+    }
+    $this->_where = " WHERE {$optionGroupClause}
+                            {$this->_aliases['civicrm_activity']}.is_test = 0 AND
+                            {$this->_aliases['civicrm_activity']}.is_deleted = 0 AND
+                            {$this->_aliases['civicrm_activity']}.is_current_revision = 1";
+
+    $clauses = [];
+    foreach ($this->_columns as $tableName => $table) {
+      if (array_key_exists('filters', $table)) {
+
+        foreach ($table['filters'] as $fieldName => $field) {
+          $clause = NULL;
+          if (CRM_Utils_Array::value('type', $field) & CRM_Utils_Type::T_DATE) {
+            $relative = $this->_params["{$fieldName}_relative"] ?? NULL;
+            $from = $this->_params["{$fieldName}_from"] ?? NULL;
+            $to = $this->_params["{$fieldName}_to"] ?? NULL;
+
+            $clause = $this->dateClause($field['dbAlias'], $relative, $from, $to, $field['type']);
+          }
+          else {
+            if ($fieldName == 'duration') {
+              continue;
+            }
+            $op = $this->_params["{$fieldName}_op"] ?? NULL;
+            if ($op) {
+              $clause = $this->whereClause($field,
+                $op,
+                CRM_Utils_Array::value("{$fieldName}_value", $this->_params),
+                CRM_Utils_Array::value("{$fieldName}_min", $this->_params),
+                CRM_Utils_Array::value("{$fieldName}_max", $this->_params)
+              );
+            }
+          }
+
+          if (!empty($clause)) {
+            $clauses[] = $clause;
+          }
+        }
+      }
+    }
+
+    if (empty($clauses)) {
+      $this->_where .= " ";
+    }
+    else {
+      $this->_where .= " AND " . implode(' AND ', $clauses);
+    }
+
+    if ($this->_aclWhere && !$durationMode) {
+      $this->_where .= " AND ({$this->_aclWhere} OR civicrm_contact_source.is_deleted=0 OR civicrm_contact_assignee.is_deleted=0)";
+    }
+  }
+  
+  /**
+   * Build the report query.
+   *
+   * @param bool $applyLimit
+   *
+   * @return string
+   */
+  public function buildQuery($applyLimit = TRUE) {
+    $this->buildGroupTempTable();
+    $this->select();
+    $this->from();
+    $this->customDataFrom();
+    $this->buildPermissionClause();
+    $this->where();
+    $this->groupBy();
+    $this->orderBy();
+
+    // Order by & Section columns not selected for display need to be included in SELECT.
+    $unselectedColumns = array_merge($this->unselectedOrderByColumns(), $this->unselectedSectionColumns());
+    foreach ($unselectedColumns as $alias => $field) {
+      $clause = $this->getSelectClauseWithGroupConcatIfNotGroupedBy($field['table_name'], $field['name'], $field);
+      if (!$clause) {
+        $clause = "{$field['dbAlias']} as {$alias}";
+      }
+      $this->_select .= ", $clause ";
+    }
+
+    if ($applyLimit && empty($this->_params['charts'])) {
+      $this->limit();
+    }
+    CRM_Utils_Hook::alterReportVar('sql', $this, $this);
+
+    // build temporary table column names base on column headers of result
+    $dbColumns = [];
+    foreach ($this->_columnHeaders as $fieldName => $dontCare) {
+      $dbColumns[] = $fieldName . ' VARCHAR(128)';
+    }
+
+    // Order by & Section columns not selected for display need to be included in temp table.
+    foreach ($unselectedColumns as $alias => $section) {
+      $dbColumns[] = $alias . ' VARCHAR(128)';
+    }
+
+    // create temp table to store main result
+    $this->_tempTableName = $this->createTemporaryTable('tempTable', "
+      id int unsigned NOT NULL AUTO_INCREMENT, " . implode(', ', $dbColumns) . ' , PRIMARY KEY (id)',
+    TRUE);
+
+    // build main report query
+    $sql = "{$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
+    $this->addToDeveloperTab($sql);
+
+    // store the result in temporary table
+    $insertCols = '';
+    $insertQuery = "INSERT INTO {$this->_tempTableName} ( " . implode(',', array_merge(array_keys($this->_columnHeaders), array_keys($unselectedColumns))) . " )
+{$sql}";
+    CRM_Core_DAO::disableFullGroupByMode();
+    CRM_Core_DAO::executeQuery($insertQuery);
+    CRM_Core_DAO::reenableFullGroupByMode();
+
+    // now build the query for duration sum
+    $this->activityDurationFrom();
+    $this->where(TRUE);
+    $this->groupBy(FALSE);
+
+    // build the query to calulate duration sum
+    $sql = "SELECT SUM(activity_civireport.duration) as civicrm_activity_duration_total {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
+
+    // create temp table to store duration
+    $this->_tempDurationSumTableName = $this->createTemporaryTable('tempDurationSumTable', "
+      id int unsigned NOT NULL AUTO_INCREMENT, civicrm_activity_duration_total INT(128), PRIMARY KEY (id)",
+    TRUE);
+
+    // store the result in temporary table
+    $insertQuery = "INSERT INTO {$this->_tempDurationSumTableName} (civicrm_activity_duration_total)
+    {$sql}";
+    CRM_Core_DAO::disableFullGroupByMode();
+    CRM_Core_DAO::executeQuery($insertQuery);
+    CRM_Core_DAO::reenableFullGroupByMode();
+    
+    $fieldName = 'duration';
+    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0) * 60;
+    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0) * 60;
+    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0) * 60;
+    $op = $this->_params["{$fieldName}_op"] ?? NULL;
+    
+    $clause = '(1)';
+    if ($op && ($duration > 0 || $durationMin > 0 || $durationMax)) {
+      $clause = $this->whereClause($this->_columns['civicrm_activity']['filters']['duration'], $op,
+        $duration,
+        $durationMin,
+        $durationMax
+      );
+    }
+
+    $sql = "SELECT {$this->_tempTableName}.*,  {$this->_tempDurationSumTableName}.civicrm_activity_duration_total
+    FROM {$this->_tempTableName} INNER JOIN {$this->_tempDurationSumTableName}
+      ON ({$this->_tempTableName}.id = {$this->_tempDurationSumTableName}.id)
+      WHERE {$clause}
+      ";
+
+    // finally add duration total to column headers
+    $this->_columnHeaders['civicrm_activity_duration_total'] = ['no_display' => 1];
+
+    // reset the sql building to default, which is used / called during other actions like "add to group"
+    $this->from();
+    $this->where();
+
+    return $sql;
+  }
+
   
   /**
    * Alter display of rows.
@@ -165,7 +345,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
 
       if (array_key_exists('civicrm_activity_duration', $row)) {
         if ($value = $row['civicrm_activity_duration']) {
-          $rows[$rowNum]['civicrm_activity_duration'] = ROUND($rows[$rowNum]['civicrm_activity_duration_total'] / 60);
+          $rows[$rowNum]['civicrm_activity_duration'] = ROUND(($rows[$rowNum]['civicrm_activity_duration_total'] / 60), 2);
           $entryFound = TRUE;
         }
       }
