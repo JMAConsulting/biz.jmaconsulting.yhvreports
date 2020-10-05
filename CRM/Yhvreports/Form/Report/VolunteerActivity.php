@@ -82,7 +82,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
   }
   
   public function alterDisplay(&$rows) {
-    parent::alterDisplay(&$rows);
+    parent::alterDisplay($rows);
     if (array_key_exists('civicrm_activity_id_count', $this->_columnHeaders)) {
       $volunteerNoHeader = $this->_columnHeaders['civicrm_activity_volunteers_no'];
       unset(
