@@ -13,7 +13,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CF, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column as $field) {
       $this->_columns[$volunteeringTableName]['group_bys'][$column] = [
-        'title' => $field['title'];
+        'title' => $field['title'],
       ]; 
     }
   }

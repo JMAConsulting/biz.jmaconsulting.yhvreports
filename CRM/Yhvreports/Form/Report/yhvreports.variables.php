@@ -1,0 +1,3 @@
+<?php 
+
+CONST VOLUNTEERING_CF = 12;
