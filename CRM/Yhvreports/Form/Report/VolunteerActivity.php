@@ -12,16 +12,16 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     parent::__construct();
     $this->_columns['civicrm_activity']['fields']['volunteers_no'] = [
       'title' => ts('# of Volunteers'),
-      'dbAlias' => 'COUNT(target_activity.contact_id)';
+      'dbAlias' => 'COUNT(target_activity.contact_id)',
     ];
-    $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CF, 'return' => 'table_name']);
+    $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CG, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column => $field) {
       $this->_columns[$volunteeringTableName]['group_bys'][$field['name']] = [
         'title' => $field['title'],
         'dbAlias' => "value_volunteering_12_civireport.{$field['name']}",
       ]; 
     }
-    $volunteeWFTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUTEER_WORK_HOURS, 'return' => 'table_name']);
+    $volunteeWFTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUTEER_WORK_HOURS_CG, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column => $field) {
       if ($column == WORK_HOURS_CF) {
         $this->_columns[$volunteeWFTableName]['fields'][$column]['dbAlias'] = "SUM($field['name'])"; 
