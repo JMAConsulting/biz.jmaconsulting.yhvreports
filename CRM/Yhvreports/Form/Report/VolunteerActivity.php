@@ -24,7 +24,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     $volunteeWFTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUTEER_WORK_HOURS_CG, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column => $field) {
       if ($column == WORK_HOURS_CF) {
-        $this->_columns[$volunteeWFTableName]['fields'][$column]['dbAlias'] = "SUM($field['name'])"; 
+        $this->_columns[$volunteeWFTableName]['fields'][$column]['dbAlias'] = sprintf("SUM(%s)", $field['name']);
       }
     }
   }
@@ -81,11 +81,18 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     }
   }
   
-  /**
-   * Override group by function.
-   */
-  public function groupBy() {
-    parent::groupBy();
+  public function alterDisplay(&$rows) {
+    parent::alterDisplay(&$rows);
+    if (array_key_exists('civicrm_activity_id_count', $this->_columnHeaders)) {
+      $volunteerNoHeader = $this->_columnHeaders['civicrm_activity_volunteers_no'];
+      unset(
+        $this->_columnHeaders['civicrm_activity_volunteers_no'],
+        $this->_columnHeaders['civicrm_activity_id_count'],
+        $this->_columnHeaders['civicrm_activity_activity_type_id'],
+        $this->_columnHeaders['civicrm_activity_status_id']
+      );
+      $this->_columnHeaders['civicrm_activity_volunteers_no'] = $volunteerNoHeader;
+    }
   }
 
 }
