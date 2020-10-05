@@ -1,26 +1,28 @@
 <?php
+
+require_once __DIR__ . 'yhvreports.variables.php';
+
 use CRM_Yhvreports_ExtensionUtil as E;
 
-class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activity {
+class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_ActivitySummary {
   
+  protected $_customGroupExtends = ['Activity'];
+
   public function __construct() {
     parent::__construct();
-    $this->_columns['civicrm_activity']['fields']['number_of_volunteers'] = [
-      'title' => ts('# of Volunteers'),
-      'dbAlias' => "COUNT(DISTINCT civicrm_contact_target.id)",
-    ];
-    $this->_columns['civicrm_activity']['group_bys'] = [
-      'funder' => [
-        'title' => 'Funder',
-      ],
-    ];
+    $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CF, 'return' => 'table_name']);
+    foreach($this->_columns[$volunteeringTableName]['fields'] as $column as $field) {
+      $this->_columns[$volunteeringTableName]['group_bys'][$column] = [
+        'title' => $field['title'];
+      ]; 
+    }
   }
   
   /**
    * Override group by function.
    */
   public function groupBy() {
-    $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, "{$this->_aliases['civicrm_activity']}.id");
+    parent::groupBy();
   }
 
 }
