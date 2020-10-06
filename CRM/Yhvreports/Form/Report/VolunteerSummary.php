@@ -2,7 +2,7 @@
 use CRM_Yhvreports_ExtensionUtil as E;
 
 class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_ActivitySummary {
-  protected $_customGroupExtends = ['Activity'];
+  protected $_customGroupExtends = ['Activity', 'Individual'];
 
   public function __construct() {
     parent::__construct();
@@ -12,8 +12,9 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
+    $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
   }
-  
+
   /**
    * @param $rows
    *
@@ -57,7 +58,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     ];
     return $statistics;
   }
-  
+
   /**
    * Generate where clause.
    *
@@ -119,7 +120,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       $this->_where .= " AND ({$this->_aclWhere} OR civicrm_contact_source.is_deleted=0 OR civicrm_contact_assignee.is_deleted=0)";
     }
   }
-  
+
   /**
    * Build the report query.
    *
@@ -199,13 +200,13 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     CRM_Core_DAO::disableFullGroupByMode();
     CRM_Core_DAO::executeQuery($insertQuery);
     CRM_Core_DAO::reenableFullGroupByMode();
-    
+
     $fieldName = 'duration';
     $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0) * 60;
     $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0) * 60;
     $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0) * 60;
     $op = $this->_params["{$fieldName}_op"] ?? NULL;
-    
+
     $clause = '(1)';
     if ($op && ($duration > 0 || $durationMin > 0 || $durationMax)) {
       $clause = $this->whereClause($this->_columns['civicrm_activity']['filters']['duration'], $op,
@@ -231,7 +232,31 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     return $sql;
   }
 
-  
+  public function modifyColumnHeaders() {
+    //CRM-16719 modify name of column
+    if (!empty($this->_columnHeaders['civicrm_activity_status_id'])) {
+      $this->_columnHeaders['civicrm_activity_status_id']['title'] = ts('Status');
+    }
+    $columnHeaders = [];
+    foreach ([
+      'civicrm_contact_sort_name' => 'Name',
+      'civicrm_value_volunteer_inf_9_custom_24' => NULL,
+      'civicrm_contact_exposed_id' => 'Vol ID#',
+      'civicrm_activity_activity_type_id' => NULL,
+      'civicrm_activity_duration' => 'Volunteer Hours',
+    ] as $columnName => $title) {
+      if (!empty($this->_columnHeaders[$columnName])) {
+        if (!empty($title)) {
+          $this->_columnHeaders[$columnName]['title'] = $title;
+        }
+        $columnHeaders[$columnName] = $this->_columnHeaders[$columnName];
+        unset($this->_columnHeaders[$columnName]);
+      }
+    }
+    $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
+  }
+
+
   /**
    * Alter display of rows.
    *

@@ -14,6 +14,10 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
       'title' => ts('# of Volunteers'),
       'dbAlias' => 'COUNT(target_activity.contact_id)',
     ];
+    $this->_columns['civicrm_activity']['fields']['volunteers_unique_no'] = [
+      'title' => ts('# of Unique Volunteers'),
+      'dbAlias' => 'COUNT(DISTINCT target_activity.contact_id)',
+    ];
     $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CG, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column => $field) {
       $this->_columns[$volunteeringTableName]['group_bys'][$field['name']] = [
@@ -85,13 +89,16 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     parent::alterDisplay($rows);
     if (array_key_exists('civicrm_activity_id_count', $this->_columnHeaders)) {
       $volunteerNoHeader = $this->_columnHeaders['civicrm_activity_volunteers_no'];
+      $uniqueVolunteerNoHeader = $this->_columnHeaders['civicrm_activity_volunteers_unique_no'];
       unset(
         $this->_columnHeaders['civicrm_activity_volunteers_no'],
+        $this->_columnHeaders['civicrm_activity_volunteers_unique_no'],
         $this->_columnHeaders['civicrm_activity_id_count'],
         $this->_columnHeaders['civicrm_activity_activity_type_id'],
         $this->_columnHeaders['civicrm_activity_status_id']
       );
       $this->_columnHeaders['civicrm_activity_volunteers_no'] = $volunteerNoHeader;
+      $this->_columnHeaders['civicrm_activity_volunteers_unique_no'] = $uniqueVolunteerNoHeader;
     }
   }
 
