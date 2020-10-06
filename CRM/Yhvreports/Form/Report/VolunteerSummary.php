@@ -122,6 +122,56 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
   }
 
   /**
+   * Group the fields.
+   *
+   * @param bool $includeSelectCol
+   */
+  public function groupBy($includeSelectCol = TRUE) {
+    $this->_groupBy = [];
+    if (!empty($this->_params['group_bys']) &&
+      is_array($this->_params['group_bys'])) {
+      foreach ($this->_columns as $tableName => $table) {
+        if (array_key_exists('group_bys', $table)) {
+          foreach ($table['group_bys'] as $fieldName => $field) {
+            if (!empty($this->_params['group_bys'][$fieldName])) {
+              if (!empty($field['chart'])) {
+                $this->assign('chartSupported', TRUE);
+              }
+              if (!empty($table['group_bys'][$fieldName]['frequency']) &&
+                !empty($this->_params['group_bys_freq'][$fieldName])
+              ) {
+
+                $append = "YEAR({$field['dbAlias']}),";
+                if (in_array(strtolower($this->_params['group_bys_freq'][$fieldName]),
+                  ['year']
+                )) {
+                  $append = '';
+                }
+                $this->_groupBy[] = "$append {$this->_params['group_bys_freq'][$fieldName]}({$field['dbAlias']})";
+                $append = TRUE;
+              }
+              else {
+                $this->_groupBy[] = $field['dbAlias'];
+              }
+            }
+          }
+        }
+      }
+      $this->_groupBy = empty($this->_groupBy) ? ["{$this->_aliases['civicrm_activity']}.id"] : $this->_groupBy;
+      $groupBy = $this->_groupBy;
+      $this->_groupBy = "GROUP BY " . implode(', ', $this->_groupBy);
+    }
+    else {
+      $groupBy = "{$this->_aliases['civicrm_activity']}.id";
+      $this->_groupBy = "GROUP BY {$this->_aliases['civicrm_activity']}.id ";
+    }
+    if ($includeSelectCol) {
+      $this->_groupBy = CRM_Contact_BAO_Query::getGroupByFromSelectColumns($this->_selectClauses, $groupBy);
+    }
+  }
+
+
+  /**
    * Build the report query.
    *
    * @param bool $applyLimit
