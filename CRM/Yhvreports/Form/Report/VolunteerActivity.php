@@ -31,6 +31,15 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
   }
 
   /**
+   * @param $rows
+   *
+   * @return array
+   */
+  public function statistics(&$rows) {
+    return [];
+  }
+
+  /**
    * Group the fields.
    *
    * @param bool $includeSelectCol
@@ -108,7 +117,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
       elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
         $rows[$rowNum]['civicrm_value_volunteering_12_custom_59'] = 'Total';
       }
-      elseif (!empty($row['civicrm_activity_id_count']) && empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
+      elseif (!empty($row['civicrm_contact_id']) && empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
         $rows[$rowNum]['civicrm_value_volunteering_12_custom_57'] = 'Total';
       }
     }
