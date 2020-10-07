@@ -18,6 +18,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
       'title' => ts('# of Unique Volunteers'),
       'dbAlias' => 'COUNT(DISTINCT target_activity.contact_id)',
     ];
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
     $volunteeringTableName = civicrm_api3('CustomGroup', 'getvalue', ['id' => VOLUNTEERING_CG, 'return' => 'table_name']);
     foreach($this->_columns[$volunteeringTableName]['fields'] as $column => $field) {
       if ($column == WORK_HOURS_CF) {
@@ -36,7 +37,12 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
    * @return array
    */
   public function statistics(&$rows) {
-    return [];
+    $statistics = [];
+    $this->groupByStat($statistics);
+
+    $this->filterStat($statistics);
+
+    return $statistics;
   }
 
   /**
@@ -108,19 +114,23 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     }
   }
 
-  public function alterDisplay(&$rows) {
-    parent::alterDisplay($rows);
+  public function alterCustomDataDisplay(&$rows) {
+    parent::alterCustomDataDisplay($rows);
     foreach ($rows as $rowNum => &$row) {
       if (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $rows[$rowNum]['civicrm_value_volunteering_12_custom_56'] = 'Total';
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_56'] = 'Subtotal';
       }
-      elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $rows[$rowNum]['civicrm_value_volunteering_12_custom_59'] = 'Total';
+      if (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_58'])) {
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_58'] = 'Subtotal';
+      }
+      if (!empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && (empty($row['civicrm_value_volunteering_12_custom_56']) || empty($row['civicrm_value_volunteering_12_custom_58']))) {
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_59'] = 'Subtotal';
       }
       elseif (!empty($row['civicrm_contact_id']) && empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $rows[$rowNum]['civicrm_value_volunteering_12_custom_57'] = 'Total';
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_57'] = 'Grand Total';
       }
     }
+    $this->assign('rows1', $rows);
   }
 
 }

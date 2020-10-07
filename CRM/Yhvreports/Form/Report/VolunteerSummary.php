@@ -7,7 +7,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
   public function __construct() {
     parent::__construct();
     $this->_columns['civicrm_activity']['filters']['duration'] = [
-      'title' => ts('Duration (In Hours)'),
+      'title' => ts('Volunteer Hours'),
       'dbAlias' => 'civicrm_activity_duration_total',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
@@ -53,7 +53,8 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       'value' => $totalActivity,
     ];
     $statistics['counts']['duration'] = [
-      'title' => ts('Total Duration (in Hours)'),
+      'title' => ts('Total Volunteer Hours'),
+      'type' => CRM_Utils_Type::T_STRING,
       'value' => round(($totalDuration / 60), 2),
     ];
     return $statistics;

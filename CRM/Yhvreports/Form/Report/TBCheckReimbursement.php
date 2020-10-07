@@ -1,7 +1,7 @@
 <?php
 use CRM_Yhvreports_ExtensionUtil as E;
 
-class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends extends CRM_Report_Form_ActivitySummary {
+class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_ActivitySummary {
   protected $_customGroupExtends = ['Activity', 'Individual'];
 
   public function __construct() {
