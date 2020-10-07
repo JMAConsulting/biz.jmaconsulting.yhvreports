@@ -100,125 +100,16 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
   }
 
   public function alterDisplay(&$rows) {
-    $entryFound = FALSE;
-    $activityType = CRM_Core_PseudoConstant::activityType(TRUE, TRUE, FALSE, 'label', TRUE);
-    $activityStatus = CRM_Core_PseudoConstant::activityStatus();
-    $priority = CRM_Core_PseudoConstant::get('CRM_Activity_DAO_Activity', 'priority_id');
-    $onHover = ts('View Contact Summary for this Contact');
-    foreach ($rows as $rowNum => $row) {
+    parent::alterDisplay($rows);
+    foreach ($rows as $rowNum => &$row) {
       if (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $row['civicrm_value_volunteering_12_custom_56'] = 'Total';
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_56'] = 'Total';
       }
       elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $row['civicrm_value_volunteering_12_custom_59'] = 'Total';
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_59'] = 'Total';
       }
       elseif (!empty($row['civicrm_activity_id_count']) && empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
-        $row['civicrm_value_volunteering_12_custom_57'] = 'Total';
-      }
-      // make count columns point to activity detail report
-      if (!empty($row['civicrm_activity_id_count'])) {
-        $url = [];
-        $urlParams = ['activity_type_id', 'gid', 'status_id', 'contact_id'];
-        foreach ($urlParams as $field) {
-          if (!empty($row['civicrm_activity_' . $field])) {
-            $url[] = "{$field}_op=in&{$field}_value={$row['civicrm_activity_'.$field]}";
-          }
-          elseif (!empty($this->_params[$field . '_value'])) {
-            $val = implode(",", $this->_params[$field . '_value']);
-            $url[] = "{$field}_op=in&{$field}_value={$val}";
-          }
-        }
-        $date_suffixes = ['relative', 'from', 'to'];
-        foreach ($date_suffixes as $suffix) {
-          if (!empty($this->_params['activity_date_time_' . $suffix])) {
-            list($from, $to)
-              = $this->getFromTo(
-                CRM_Utils_Array::value("activity_date_time_relative", $this->_params),
-                CRM_Utils_Array::value("activity_date_time_from", $this->_params),
-                CRM_Utils_Array::value("activity_date_time_to", $this->_params)
-                );
-            $url[] = "activity_date_time_from={$from}&activity_date_time_to={$to}";
-            break;
-          }
-        }
-        // reset date filter on activity reports.
-        $url[] = "resetDateFilter=1";
-        $url = implode('&', $url);
-        $url = CRM_Report_Utils_Report::getNextUrl('activity', "reset=1&force=1&{$url}",
-                 $this->_absoluteUrl,
-                 $this->_id,
-                 $this->_drilldownReport);
-        $rows[$rowNum]['civicrm_activity_id_count_link'] = $url;
-        $rows[$rowNum]['civicrm_activity_id_count_hover'] = ts('List all activity(s) for this row.');
-        $entryFound = TRUE;
-      }
-
-      if (array_key_exists('civicrm_contact_sort_name', $row) && $this->_outputMode != 'csv') {
-        if ($value = $row['civicrm_contact_id']) {
-
-          // unset the name, email and phone fields if the contact is the same as the previous contact
-          if (isset($previousContact) && $previousContact == $value) {
-            $rows[$rowNum]['civicrm_contact_sort_name'] = "";
-
-            if (array_key_exists('civicrm_email_email', $row)) {
-              $rows[$rowNum]['civicrm_email_email'] = "";
-            }
-            if (array_key_exists('civicrm_phone_phone', $row)) {
-              $rows[$rowNum]['civicrm_phone_phone'] = "";
-            }
-          }
-          else {
-            $url = CRM_Utils_System::url('civicrm/contact/view',
-              'reset=1&cid=' . $value,
-              $this->_absoluteUrl
-            );
-
-            $rows[$rowNum]['civicrm_contact_sort_name'] = "<a href='$url'>" . $row['civicrm_contact_sort_name'] .
-              '</a>';
-          }
-
-          // store the contact ID of this contact
-          $previousContact = $value;
-          $entryFound = TRUE;
-        }
-      }
-
-      if (array_key_exists('civicrm_activity_activity_type_id', $row)) {
-        if ($value = $row['civicrm_activity_activity_type_id']) {
-
-          $value = explode(',', $value);
-          foreach ($value as $key => $id) {
-            $value[$key] = $activityType[$id];
-          }
-
-          $rows[$rowNum]['civicrm_activity_activity_type_id'] = implode(' , ', $value);
-          $entryFound = TRUE;
-        }
-      }
-
-      if (array_key_exists('civicrm_activity_status_id', $row)) {
-        if ($value = $row['civicrm_activity_status_id']) {
-          $rows[$rowNum]['civicrm_activity_status_id'] = $activityStatus[$value];
-          $entryFound = TRUE;
-        }
-      }
-
-      if (array_key_exists('civicrm_activity_priority_id', $row)) {
-        if ($value = $row['civicrm_activity_priority_id']) {
-          $rows[$rowNum]['civicrm_activity_priority_id'] = $priority[$value];
-          $entryFound = TRUE;
-        }
-      }
-
-      if (array_key_exists('civicrm_activity_duration', $row)) {
-        if ($value = $row['civicrm_activity_duration']) {
-          $rows[$rowNum]['civicrm_activity_duration'] = ROUND(($rows[$rowNum]['civicrm_activity_duration_total'] / 60), 2);
-          $entryFound = TRUE;
-        }
-      }
-
-      if (!$entryFound) {
-        break;
+        $rows[$rowNum]['civicrm_value_volunteering_12_custom_57'] = 'Total';
       }
     }
   }
