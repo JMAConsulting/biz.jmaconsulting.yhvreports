@@ -1,7 +1,7 @@
 <?php
 use CRM_Yhvreports_ExtensionUtil as E;
 
-class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_Form {
+class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_Form_ActivitySummary {
   protected $_customGroupExtends = ['Activity', 'Individual'];
 
   public function __construct() {
@@ -18,7 +18,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     $this->_columns['civicrm_activity']['fields']['poilce_check_date'] = [
       'title' => ts('Police Check Date'),
       'dbAlias' => 'temp_police_check.police_check_date',
-      'type' => CRM_Report_Form::T_TIMESTAMP,
+      'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
   }
@@ -129,6 +129,8 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     if (!$durationMode) {
       $optionGroupClause = 'civicrm_option_group.name = "activity_type" AND ';
     }
+    $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
+    $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
     $this->_where = " WHERE
     {$optionGroupClause}
      contact_civireport.id NOT IN (
@@ -138,7 +140,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
               ON rem_police_check.id = target_activity.activity_id AND
                  target_activity.record_type_id = {$targetID} AND rem_police_check.status_id IN ('2') AND rem_police_check.activity_type_id = 57
         GROUP BY target_activity.contact_id
-    )
+    ) AND
                             {$this->_aliases['civicrm_activity']}.is_test = 0 AND
                             {$this->_aliases['civicrm_activity']}.is_deleted = 0 AND
                             {$this->_aliases['civicrm_activity']}.is_current_revision = 1";
