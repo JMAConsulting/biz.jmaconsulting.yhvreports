@@ -96,10 +96,10 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
                     ON source_activity.contact_id = civicrm_contact_source.id
              LEFT JOIN (
                SELECT target_activity.contact_id
-                FROM civicrm_activity as rem_police_check
+                FROM civicrm_activity as rem_tb_check
                 LEFT JOIN civicrm_activity_contact target_activity
-                       ON rem_police_check.id = target_activity.activity_id AND
-                       target_activity.record_type_id = {$targetID} AND rem_police_check.status_id IN ('2') AND rem_police_check.activity_type_id = 58
+                       ON rem_tb_check.id = target_activity.activity_id AND
+                       target_activity.record_type_id = {$targetID} AND rem_tb_check.status_id IN ('2') AND rem_tb_check.activity_type_id = 58
                  GROUP BY target_activity.contact_id
             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
              LEFT JOIN (
