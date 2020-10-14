@@ -262,11 +262,12 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
 
     $clause = '(1)';
     if ($op && ($duration > 0 || $durationMin > 0 || $durationMax > 0)) {
-      $clause = $this->whereClause($this->_columns['civicrm_activity']['filters']['duration'], $op,
+      $c = $this->whereClause($this->_columns['civicrm_activity']['filters']['duration'], $op,
         $duration,
         $durationMin,
         $durationMax
       );
+      $clause = $c ?: $clause;
     }
 
     $sql = "SELECT {$this->_tempTableName}.*,  {$this->_tempDurationSumTableName}.civicrm_activity_duration_total
