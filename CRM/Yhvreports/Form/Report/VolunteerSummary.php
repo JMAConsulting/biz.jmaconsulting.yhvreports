@@ -272,6 +272,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       ON ({$this->_tempTableName}.id = {$this->_tempDurationSumTableName}.id)
       WHERE {$clause}
       ";
+     $this->addToDeveloperTab($sql);
 
     // finally add duration total to column headers
     $this->_columnHeaders['civicrm_activity_duration_total'] = ['no_display' => 1];
