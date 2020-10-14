@@ -253,9 +253,9 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     CRM_Core_DAO::reenableFullGroupByMode();
 
     $fieldName = 'duration';
-    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0) * 60;
-    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0) * 60;
-    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0) * 60;
+    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0);
+    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0);
+    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0);
     $op = $this->_params["{$fieldName}_op"] ?? NULL;
 
     $clause = '(1)';
