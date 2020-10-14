@@ -120,7 +120,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
       if (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
         $rows[$rowNum]['civicrm_value_volunteering_12_custom_56'] = 'Subtotal';
       }
-      elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_58'])) {
+      elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && !empty($row['civicrm_value_volunteering_12_custom_58']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
         $rows[$rowNum]['civicrm_value_volunteering_12_custom_58'] = 'Subtotal';
       }
       elseif (!empty($row['civicrm_value_volunteering_12_custom_57']) && empty($row['civicrm_value_volunteering_12_custom_59']) && empty($row['civicrm_value_volunteering_12_custom_56'])) {
