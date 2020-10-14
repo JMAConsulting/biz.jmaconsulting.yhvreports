@@ -12,6 +12,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
   }
 
@@ -260,7 +261,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     $op = $this->_params["{$fieldName}_op"] ?? NULL;
 
     $clause = '(1)';
-    if ($op && ($duration > 0 || $durationMin > 0 || $durationMax)) {
+    if ($op && ($duration > 0 || $durationMin > 0 || $durationMax > 0)) {
       $clause = $this->whereClause($this->_columns['civicrm_activity']['filters']['duration'], $op,
         $duration,
         $durationMin,
