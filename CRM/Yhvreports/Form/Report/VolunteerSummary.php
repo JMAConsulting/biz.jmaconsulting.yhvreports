@@ -55,7 +55,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     $statistics['counts']['duration'] = [
       'title' => ts('Total Volunteer Hours'),
       'type' => CRM_Utils_Type::T_STRING,
-      'value' => round(($totalDuration / 60), 2),
+      'value' => round($totalDuration, 2),
     ];
     return $statistics;
   }
@@ -239,6 +239,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
 
     // build the query to calulate duration sum
     $sql = "SELECT SUM(activity_civireport.duration) as civicrm_activity_duration_total {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy} {$this->_limit}";
+    $this->addToDeveloperTab($sql);
 
     // create temp table to store duration
     $this->_tempDurationSumTableName = $this->createTemporaryTable('tempDurationSumTable', "
@@ -422,7 +423,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
 
       if (array_key_exists('civicrm_activity_duration', $row)) {
         if ($value = $row['civicrm_activity_duration']) {
-          $rows[$rowNum]['civicrm_activity_duration'] = ROUND(($rows[$rowNum]['civicrm_activity_duration_total'] / 60), 2);
+          $rows[$rowNum]['civicrm_activity_duration'] = ROUND($rows[$rowNum]['civicrm_activity_duration_total'], 2);
           $entryFound = TRUE;
         }
       }
