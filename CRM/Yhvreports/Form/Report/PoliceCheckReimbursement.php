@@ -95,6 +95,14 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
              LEFT JOIN civicrm_contact civicrm_contact_source
                     ON source_activity.contact_id = civicrm_contact_source.id
              LEFT JOIN (
+                SELECT target_activity.contact_id
+                 FROM civicrm_activity as rem_police_check
+                 LEFT JOIN civicrm_activity_contact target_activity
+                        ON rem_police_check.id = target_activity.activity_id AND
+                        target_activity.record_type_id = {$targetID} AND rem_police_check.status_id IN ('2') AND rem_police_check.activity_type_id = 57
+                  GROUP BY target_activity.contact_id
+             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
+             LEFT JOIN (
                SELECT target_activity.contact_id, MAX(police_check.activity_date_time) as police_check_date
                 FROM civicrm_activity as police_check
                 LEFT JOIN civicrm_activity_contact target_activity
@@ -129,18 +137,8 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     if (!$durationMode) {
       $optionGroupClause = 'civicrm_option_group.name = "activity_type" AND ';
     }
-    $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
-    $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
     $this->_where = " WHERE
     {$optionGroupClause}
-     contact_civireport.id NOT IN (
-      SELECT DISTINCT target_activity.contact_id
-       FROM civicrm_activity as rem_police_check
-       LEFT JOIN civicrm_activity_contact target_activity
-              ON rem_police_check.id = target_activity.activity_id AND
-                 target_activity.record_type_id = {$targetID} AND rem_police_check.status_id IN ('2') AND rem_police_check.activity_type_id = 57
-        GROUP BY target_activity.contact_id
-    ) AND
                             {$this->_aliases['civicrm_activity']}.is_test = 0 AND
                             {$this->_aliases['civicrm_activity']}.is_deleted = 0 AND
                             {$this->_aliases['civicrm_activity']}.is_current_revision = 1";
