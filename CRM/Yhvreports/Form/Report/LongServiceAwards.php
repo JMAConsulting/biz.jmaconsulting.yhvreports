@@ -46,6 +46,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
     $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
     $sourceID = CRM_Utils_Array::key('Activity Source', $activityContacts);
+    $pastYear = date("Y",strtotime("-1 year"));
 
     $this->_from = "
         FROM civicrm_activity {$this->_aliases['civicrm_activity']}
@@ -73,7 +74,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
-                       volunteer.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
+                       target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
                 LEFT JOIN civicrm_value_volunteer_awa_11 cust ON cust.entity_id = target_activity.activity_id
                  GROUP BY target_activity.contact_id
              ) temp ON temp.contact_id = contact_civireport.id 
@@ -83,7 +84,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
-                       volunteer.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55 AND YEAR(volunteer.activity_date_time) = 2019
+                       target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55 AND YEAR(volunteer.activity_date_time) = {$pastYear}
                        WHERE SUM(duration) > 0
                  GROUP BY target_activity.contact_id
              ) temp_last_year ON temp_last_year.contact_id = contact_civireport.id 
