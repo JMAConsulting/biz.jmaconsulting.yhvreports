@@ -67,9 +67,9 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
              LEFT JOIN civicrm_contact civicrm_contact_source
                     ON source_activity.contact_id = civicrm_contact_source.id
                     
-             INNER JOIN (
+             LEFT JOIN (
                SELECT target_activity.contact_id, 
-                  GROUP_CONCAT(DISTINCT YEAR(volunteer.activity_date_time)) as years_of_service,
+                  COUNT(DISTINCT YEAR(volunteer.activity_date_time)) as years_of_service,
                   GROUP_CONCAT(DISTINCT CONCAT(cust.award_name_54, cust.award_for_year_55)) as past_awards
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
@@ -85,7 +85,6 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
                        target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55 AND YEAR(volunteer.activity_date_time) = {$pastYear}
-                       WHERE SUM(duration) > 0
                  GROUP BY target_activity.contact_id
              ) temp_last_year ON temp_last_year.contact_id = contact_civireport.id 
              {$this->_aclFrom}
@@ -389,7 +388,14 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
       'civicrm_contact_sort_name' => 'Name',
       'civicrm_value_volunteer_inf_9_custom_24' => NULL,
       'civicrm_contact_exposed_id' => 'Vol ID#',
+      'civicrm_activity_years_of_service' => NULL,
+      'civicrm_phone_phone' => NULL,
+      'civicrm_address_street_address' => NULL,
+      'civicrm_address_city' => NULL,
+      'civicrm_address_postal_code' => NULL,
       'civicrm_activity_activity_type_id' => NULL,
+      'civicrm_activity_hours_last_year' => NULL,
+      'civicrm_activity_past_awards' => NULL,
       'civicrm_activity_duration' => 'Volunteer Hours',
     ] as $columnName => $title) {
       if (!empty($this->_columnHeaders[$columnName])) {
@@ -400,6 +406,13 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
         unset($this->_columnHeaders[$columnName]);
       }
     }
+    unset(
+      $this->_columnHeaders['civicrm_activity_volunteers_no'],
+      $this->_columnHeaders['civicrm_activity_volunteers_unique_no'],
+      $this->_columnHeaders['civicrm_activity_id_count'],
+      $this->_columnHeaders['civicrm_activity_activity_type_id'],
+      $this->_columnHeaders['civicrm_activity_status_id']
+    );
     $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
   }
 
