@@ -102,7 +102,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
                        target_activity.record_type_id = {$targetID} AND rem_tb_check.status_id IN ('2') AND rem_tb_check.activity_type_id = 58
                  GROUP BY target_activity.contact_id
             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
-             LEFT JOIN (
+             INNER JOIN (
                SELECT target_activity.contact_id, MAX(police_check.activity_date_time) as tb_check_date
                 FROM civicrm_activity as police_check
                 LEFT JOIN civicrm_activity_contact target_activity
@@ -110,7 +110,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
                           target_activity.record_type_id = {$targetID} AND police_check.status_id IN ('2') AND police_check.activity_type_id = 63
                  GROUP BY target_activity.contact_id
              ) temp_tb_check ON temp_tb_check.contact_id = contact_civireport.id
-             
+
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
                     ON ( {$this->_aliases['civicrm_activity']}.activity_type_id = civicrm_option_value.value )
