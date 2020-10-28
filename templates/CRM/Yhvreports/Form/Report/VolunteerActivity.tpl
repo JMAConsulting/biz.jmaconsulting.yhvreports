@@ -129,7 +129,7 @@
                                 <a title="{$row.$fieldHover|escape}" href="{$row.$fieldLink}"  {if $row.$fieldClass} class="{$row.$fieldClass}"{/if}>
                             {/if}
 
-                            {if $row.$field|substr:-7 eq 'Subtotal' || $row.$field eq 'Grand Total'}
+                            {if $row.$field|substr:0:-7 eq 'Subtotal' || $row.$field eq 'Grand Total'}
                                 {$row.$field}
                             {elseif $header.type & 4 OR $header.type & 256}
                                 {if $header.group_by eq 'MONTH' or $header.group_by eq 'QUARTER'}
