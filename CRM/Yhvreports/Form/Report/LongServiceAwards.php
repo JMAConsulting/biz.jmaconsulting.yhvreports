@@ -16,7 +16,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     ];
     $this->_columns['civicrm_activity']['fields']['years_of_service'] = [
       'title' => 'Years of Service',
-      'dbAlias' => 'temp.years_of_service',
+      'dbAlias' => 'temp_last_year.years_of_service',
     ];
     $this->_columns['civicrm_activity']['fields']['hours_last_year'] = [
       'title' => 'Hours Last Year',
@@ -34,7 +34,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     ];
     $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
-    
+
   }
 
 
@@ -66,27 +66,26 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
                     ON assignment_activity.contact_id = civicrm_contact_assignee.id
              LEFT JOIN civicrm_contact civicrm_contact_source
                     ON source_activity.contact_id = civicrm_contact_source.id
-                    
+
              LEFT JOIN (
-               SELECT target_activity.contact_id, 
-                  COUNT(DISTINCT YEAR(volunteer.activity_date_time)) as years_of_service,
-                  GROUP_CONCAT(DISTINCT CONCAT(cust.award_name_54, cust.award_for_year_55)) as past_awards
+               SELECT target_activity.contact_id,
+                  GROUP_CONCAT(DISTINCT CONCAT(cust.award_name_54, ' - ', DATE_FORMAT(cust.award_for_year_55, '%Y %b'))) as past_awards
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
-                       target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
+                       target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 56
                 LEFT JOIN civicrm_value_volunteer_awa_11 cust ON cust.entity_id = target_activity.activity_id
                  GROUP BY target_activity.contact_id
-             ) temp ON temp.contact_id = contact_civireport.id 
-             
+             ) temp ON temp.contact_id = contact_civireport.id
+
              LEFT JOIN (
-               SELECT target_activity.contact_id, SUM(duration) as hours_last_year
+               SELECT target_activity.contact_id, SUM(duration) as hours_last_year, COUNT(DISTINCT YEAR(volunteer.activity_date_time)) as years_of_service
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
                        target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55 AND YEAR(volunteer.activity_date_time) = {$pastYear}
                  GROUP BY target_activity.contact_id
-             ) temp_last_year ON temp_last_year.contact_id = contact_civireport.id 
+             ) temp_last_year ON temp_last_year.contact_id = contact_civireport.id
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
                     ON ( {$this->_aliases['civicrm_activity']}.activity_type_id = civicrm_option_value.value )
@@ -102,7 +101,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     $this->joinPhoneFromContact();
 
     $this->joinEmailFromContact();
-    
+
     $this->joinAddressFromContact();
   }
 
