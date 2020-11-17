@@ -410,15 +410,6 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
       }
     }
     $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
-    unset(
-      $this->_columnHeaders['civicrm_activity_volunteers_no'],
-      $this->_columnHeaders['civicrm_activity_volunteers_unique_no'],
-      $this->_columnHeaders['civicrm_activity_id_count'],
-      $this->_columnHeaders['civicrm_activity_activity_type_id'],
-      $this->_columnHeaders['civicrm_activity_status_id']
-    );
-//    $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
-
   }
 
 
