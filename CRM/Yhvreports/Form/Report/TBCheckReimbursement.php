@@ -7,16 +7,14 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
   public function __construct() {
     parent::__construct();
     $this->_columns['civicrm_activity']['filters']['duration'] = [
-      'title' => ts('Duration (In Hours)'),
+      'title' => E::ts('Duration (In Hours)'),
       'dbAlias' => 'civicrm_activity_duration_total',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
-      'title' => ts('Registration Date'),
-    ];
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = E::ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['fields']['poilce_check_date'] = [
-      'title' => ts('TB Check Date'),
+      'title' => E::ts('TB Check Date'),
       'dbAlias' => 'temp_tb_check.tb_check_date',
       'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
@@ -29,8 +27,13 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
    * @return array
    */
   public function statistics(&$rows) {
-    $statistics = parent::statistics($rows);
-    $totalType = $totalActivity = $totalDuration = 0;
+//    $statistics = parent::statistics($rows);
+    $statistics = [];
+    $this->groupByStat($statistics);
+
+    $this->filterStat($statistics);
+ return $statistics;
+   $totalType = $totalActivity = $totalDuration = 0;
 
     $query = "SELECT {$this->_tempTableName}.civicrm_activity_activity_type_id,
         {$this->_tempTableName}.civicrm_activity_id_count,
