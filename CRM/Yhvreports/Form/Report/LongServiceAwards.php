@@ -26,13 +26,16 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
       'title' => 'Past Awards',
       'dbAlias' => 'temp.past_awards',
     ];
+    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
+      'title' => E::ts('Registration Date'),
+    ];
     $this->_columns['civicrm_activity']['filters']['duration'] = [
-      'title' => ts('Volunteer Hours'),
+      'title' => E::ts('Volunteer Hours'),
       'dbAlias' => 'civicrm_activity_duration_total',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = E::ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
 
   }
@@ -388,6 +391,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
       'civicrm_value_volunteer_inf_9_custom_24' => NULL,
       'civicrm_contact_exposed_id' => 'Vol ID#',
       'civicrm_activity_years_of_service' => NULL,
+      'civicrm_activity_activity_date_time' => NULL,
       'civicrm_phone_phone' => NULL,
       'civicrm_address_street_address' => NULL,
       'civicrm_address_city' => NULL,
