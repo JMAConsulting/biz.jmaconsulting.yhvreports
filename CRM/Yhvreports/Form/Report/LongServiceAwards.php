@@ -29,9 +29,9 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
       'title' => E::ts('Registration Date'),
     ];
-    $this->_columns['civicrm_activity']['filters']['duration'] = [
+    $this->_columns['civicrm_activity']['filters']['hours_last_year'] = [
       'title' => E::ts('Volunteer Hours'),
-      'dbAlias' => 'civicrm_activity_duration_total',
+      'dbAlias' => 'temp_last_year.hours_last_year',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
@@ -183,7 +183,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
             $clause = $this->dateClause($field['dbAlias'], $relative, $from, $to, $field['type']);
           }
           else {
-            if ($fieldName == 'duration') {
+            if ($fieldName == 'duration' || ($fieldName === 'hours_last_year' && $durationMode)) {
               continue;
             }
             $op = $this->_params["{$fieldName}_op"] ?? NULL;
@@ -409,6 +409,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
         unset($this->_columnHeaders[$columnName]);
       }
     }
+    $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
     unset(
       $this->_columnHeaders['civicrm_activity_volunteers_no'],
       $this->_columnHeaders['civicrm_activity_volunteers_unique_no'],
@@ -416,7 +417,8 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
       $this->_columnHeaders['civicrm_activity_activity_type_id'],
       $this->_columnHeaders['civicrm_activity_status_id']
     );
-    $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
+//    $this->_columnHeaders = array_merge($columnHeaders, $this->_columnHeaders);
+
   }
 
 

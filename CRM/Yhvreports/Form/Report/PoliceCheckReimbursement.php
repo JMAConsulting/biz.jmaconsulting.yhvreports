@@ -12,9 +12,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
-      'title' => ts('Registration Date'),
-    ];
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['fields']['poilce_check_date'] = [
       'title' => ts('Police Check Date'),
       'dbAlias' => 'temp_police_check.police_check_date',
@@ -29,7 +27,13 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
    * @return array
    */
   public function statistics(&$rows) {
-    $statistics = parent::statistics($rows);
+    // $statistics = parent::statistics($rows);
+    $statistics = [];
+    $this->groupByStat($statistics);
+
+    $this->filterStat($statistics);
+
+    return $statistics;
     $totalType = $totalActivity = $totalDuration = 0;
 
     $query = "SELECT {$this->_tempTableName}.civicrm_activity_activity_type_id,

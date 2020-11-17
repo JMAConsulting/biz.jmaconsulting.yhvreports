@@ -434,5 +434,6 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
         break;
       }
     }
+    $this->setPager();
   }
 }
