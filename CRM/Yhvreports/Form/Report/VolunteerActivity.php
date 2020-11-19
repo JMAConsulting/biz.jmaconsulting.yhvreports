@@ -136,4 +136,24 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     $this->assign('rows1', $rows);
   }
 
+  /**
+   * Generate from clause for when calculating activity durations.
+   */
+  public function activityDurationFrom() {
+    $activityContacts = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
+    $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
+    $this->_from = "
+      FROM civicrm_activity {$this->_aliases['civicrm_activity']}
+              LEFT JOIN civicrm_activity_contact target_activity
+                     ON {$this->_aliases['civicrm_activity']}.id = target_activity.activity_id AND
+                        target_activity.record_type_id = {$targetID}
+              LEFT JOIN civicrm_contact contact_civireport
+                     ON target_activity.contact_id = contact_civireport.id
+              {$this->_aclFrom}";
+
+    // Email table is needed if sorting by Email.
+    $this->joinEmailFromContact();
+    $this->customDataFrom();
+  }
+
 }
