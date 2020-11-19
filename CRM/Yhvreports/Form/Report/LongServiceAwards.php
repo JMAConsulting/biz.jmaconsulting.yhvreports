@@ -16,7 +16,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     ];
     $this->_columns['civicrm_activity']['fields']['years_of_service'] = [
       'title' => 'Years of Service',
-      'dbAlias' => 'temp_last_year.years_of_service',
+      'dbAlias' => 'COUNT(DISTINCT YEAR(activity_civireport.activity_date_time))',
     ];
     $this->_columns['civicrm_activity']['fields']['hours_last_year'] = [
       'title' => 'Hours Last Year',
@@ -82,7 +82,7 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
              ) temp ON temp.contact_id = contact_civireport.id
 
              LEFT JOIN (
-               SELECT target_activity.contact_id, SUM(duration) as hours_last_year, COUNT(DISTINCT YEAR(volunteer.activity_date_time)) as years_of_service
+               SELECT target_activity.contact_id, SUM(duration) as hours_last_year
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
