@@ -71,7 +71,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
     $details = [];
     $staff = civicrm_api3('GroupContact', 'get', [
       'sequential' => 1,
-      'group_id' => "Coordinators",
+      'group_id' => "Coordinators_5",
       'status' => 'Added',
       'options' => ['limit' => 0],
       'api.Contact.get' => ['return' => "display_name"],
@@ -167,13 +167,6 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'title' => ts('Target Name'),
             'operator' => 'like',
             'type' => CRM_Report_Form::OP_STRING,
-          ],
-          'assignee_contact' => [
-            'name' => 'assignee_contact',
-            'title' => ts('Assignee'),
-            'type' => CRM_Utils_Type::T_INT,
-            'operatorType' => CRM_Report_Form::OP_SELECT,
-            'options' => ['0' => ts('No'), '1' => ts('Yes')],
           ],
           'current_user' => [
             'name' => 'current_user',
