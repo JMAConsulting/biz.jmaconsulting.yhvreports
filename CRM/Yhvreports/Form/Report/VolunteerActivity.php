@@ -31,6 +31,11 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
     }
   }
 
+  public function where($durationMode = FALSE) {
+    parent::where($durationMode);
+    $this->_where .= " AND value_volunteering_12_civireport.location_59 IS NOT NULL AND value_volunteering_12_civireport.location_59 != '' AND value_volunteering_12_civireport.division_58 IS NOT NULL AND value_volunteering_12_civireport.division_58 != '' AND value_volunteering_12_civireport.funder_57 IS NOT NULL AND value_volunteering_12_civireport.funder_57 != ''";
+  }
+
   /**
    * @param $rows
    *
