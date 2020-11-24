@@ -7,7 +7,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
   public function __construct() {
     parent::__construct();
     $this->_columns['civicrm_activity']['filters']['duration'] = [
-      'title' => E::ts('Duration (In Hours)'),
+      'title' => E::ts('Volunteer Hours'),
       'dbAlias' => 'civicrm_activity_duration_total',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
@@ -19,6 +19,14 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
+    $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
+    foreach ([
+      'civicrm_value_volunteering_12',
+      'civicrm_value_volunteer_awa_11',
+      'civicrm_value_volunteer_req_14'
+    ] as $column) {
+      unset($this->_columns[$column]);
+    }
   }
 
   /**
@@ -64,7 +72,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'value' => $totalActivity,
     ];
     $statistics['counts']['duration'] = [
-      'title' => ts('Total Duration (in Hours)'),
+      'title' => ts('Volunteer Hours'),
       'value' => round(($totalDuration / 60), 2),
     ];
     return $statistics;
@@ -105,14 +113,15 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
                        target_activity.record_type_id = {$targetID} AND rem_tb_check.status_id IN ('2') AND rem_tb_check.activity_type_id = 58
                  GROUP BY target_activity.contact_id
             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
-             INNER JOIN (
-               SELECT target_activity.contact_id, MAX(police_check.activity_date_time) as tb_check_date
-                FROM civicrm_activity as police_check
-                LEFT JOIN civicrm_activity_contact target_activity
-                       ON police_check.id = target_activity.activity_id AND
-                          target_activity.record_type_id = {$targetID} AND police_check.status_id IN ('2') AND police_check.activity_type_id = 63
-                 GROUP BY target_activity.contact_id
-             ) temp_tb_check ON temp_tb_check.contact_id = contact_civireport.id
+
+            INNER JOIN (
+              SELECT target_activity.contact_id
+               FROM civicrm_activity as volunteer
+               LEFT JOIN civicrm_activity_contact target_activity
+                      ON volunteer.id = target_activity.activity_id AND
+                         target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
+                GROUP BY target_activity.contact_id
+            ) temp_volunteer ON temp_volunteer.contact_id = contact_civireport.id
 
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
@@ -345,9 +354,9 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
     CRM_Core_DAO::reenableFullGroupByMode();
 
     $fieldName = 'duration';
-    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0) * 60;
-    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0) * 60;
-    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0) * 60;
+    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0);
+    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0);
+    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0);
     $op = $this->_params["{$fieldName}_op"] ?? NULL;
 
     $clause = '(1)';
@@ -513,7 +522,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
 
       if (array_key_exists('civicrm_activity_duration', $row)) {
         if ($value = $row['civicrm_activity_duration']) {
-          $rows[$rowNum]['civicrm_activity_duration'] = ROUND(($rows[$rowNum]['civicrm_activity_duration_total'] / 60), 2);
+          $rows[$rowNum]['civicrm_activity_duration'] = ROUND($rows[$rowNum]['civicrm_activity_duration_total'], 2);
           $entryFound = TRUE;
         }
       }
