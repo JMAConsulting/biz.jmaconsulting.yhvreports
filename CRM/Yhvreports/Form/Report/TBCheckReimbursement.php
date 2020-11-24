@@ -13,10 +13,9 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'type' => CRM_Utils_Type::T_INT,
     ];
     $this->_columns['civicrm_activity']['fields']['duration']['title'] = E::ts('Volunteer Hours');
-    $this->_columns['civicrm_activity']['fields']['poilce_check_date'] = [
+    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
       'title' => E::ts('TB Check Date'),
-      'dbAlias' => 'temp_tb_check.tb_check_date',
-      'type' => CRM_Utils_Type::T_TIMESTAMP,
+      'dbAlias' => 'MAX(activity_civireport.activity_date_time)',
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
     $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
