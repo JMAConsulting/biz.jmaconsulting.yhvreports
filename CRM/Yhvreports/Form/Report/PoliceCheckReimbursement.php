@@ -7,7 +7,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
   public function __construct() {
     parent::__construct();
     $this->_columns['civicrm_activity']['filters']['duration'] = [
-      'title' => ts('Duration (In Hours)'),
+      'title' => E::ts('Volunteer Hours'),
       'dbAlias' => 'civicrm_activity_duration_total',
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
@@ -15,11 +15,6 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
       'title' => ts('Police Check Date'),
       'dbAlias' => 'MAX(activity_civireport.activity_date_time)',
-    ];
-    $this->_columns['civicrm_activity']['fields']['reg_date'] = [
-      'title' => ts('Registration Date'),
-      'dbAlias' => 'temp_volunteer.reg_date',
-      'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
     $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
@@ -76,7 +71,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
       'value' => $totalActivity,
     ];
     $statistics['counts']['duration'] = [
-      'title' => ts('Total Duration (in Hours)'),
+      'title' => ts('Total Volunteer Hours'),
       'value' => round(($totalDuration / 60), 2),
     ];
     return $statistics;
@@ -118,7 +113,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                   GROUP BY target_activity.contact_id
              ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
              INNER JOIN (
-               SELECT target_activity.contact_id, MAX(volunteer.activity_date_time) as reg_date
+               SELECT target_activity.contact_id
                 FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON volunteer.id = target_activity.activity_id AND
