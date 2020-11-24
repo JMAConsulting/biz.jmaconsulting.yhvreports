@@ -12,13 +12,24 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
-    $this->_columns['civicrm_activity']['fields']['poilce_check_date'] = [
+    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
       'title' => ts('Police Check Date'),
-      'dbAlias' => 'temp_police_check.police_check_date',
+      'dbAlias' => 'MAX(activity_civireport.activity_date_time)',
+    ];
+    $this->_columns['civicrm_activity']['fields']['reg_date'] = [
+      'title' => ts('Registration Date'),
+      'dbAlias' => 'temp_volunteer.reg_date',
       'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
+    $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
+    foreach ([
+      'civicrm_value_volunteering_12',
+      'civicrm_value_volunteer_awa_11',
+      'civicrm_value_volunteer_req_14'
+    ] as $column) {
+      unset($this->_columns[$column]);
+    }
   }
 
   /**
@@ -107,13 +118,13 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                   GROUP BY target_activity.contact_id
              ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
              INNER JOIN (
-               SELECT target_activity.contact_id, MAX(police_check.activity_date_time) as police_check_date
-                FROM civicrm_activity as police_check
+               SELECT target_activity.contact_id, MAX(volunteer.activity_date_time) as reg_date
+                FROM civicrm_activity as volunteer
                 LEFT JOIN civicrm_activity_contact target_activity
-                       ON police_check.id = target_activity.activity_id AND
-                          target_activity.record_type_id = {$targetID} AND police_check.status_id IN ('2') AND police_check.activity_type_id = 62
+                       ON volunteer.id = target_activity.activity_id AND
+                          target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
                  GROUP BY target_activity.contact_id
-             ) temp_police_check ON temp_police_check.contact_id = contact_civireport.id
+             ) temp_volunteer ON temp_volunteer.contact_id = contact_civireport.id
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
                     ON ( {$this->_aliases['civicrm_activity']}.activity_type_id = civicrm_option_value.value )
@@ -345,9 +356,9 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     CRM_Core_DAO::reenableFullGroupByMode();
 
     $fieldName = 'duration';
-    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0) * 60;
-    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0) * 60;
-    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0) * 60;
+    $duration = CRM_Utils_Array::value("{$fieldName}_value", $this->_params, 0);
+    $durationMin = CRM_Utils_Array::value("{$fieldName}_min", $this->_params, 0);
+    $durationMax = CRM_Utils_Array::value("{$fieldName}_max", $this->_params, 0);
     $op = $this->_params["{$fieldName}_op"] ?? NULL;
 
     $clause = '(1)';
@@ -513,7 +524,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
 
       if (array_key_exists('civicrm_activity_duration', $row)) {
         if ($value = $row['civicrm_activity_duration']) {
-          $rows[$rowNum]['civicrm_activity_duration'] = ROUND(($rows[$rowNum]['civicrm_activity_duration_total'] / 60), 2);
+          $rows[$rowNum]['civicrm_activity_duration'] = ROUND($rows[$rowNum]['civicrm_activity_duration_total'], 2);
           $entryFound = TRUE;
         }
       }
