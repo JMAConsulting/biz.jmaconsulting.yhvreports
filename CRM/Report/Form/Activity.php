@@ -68,7 +68,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
     $this->activityTypes = CRM_Core_OptionGroup::values('activity_type', FALSE, FALSE, FALSE, $condition);
     asort($this->activityTypes);
 
-    $details = [];
+    $details = [CRM_Core_Session::getLoggedInContactID() => 'logged in user'];
     $staff = civicrm_api3('GroupContact', 'get', [
       'sequential' => 1,
       'group_id' => "Coordinators_5",
@@ -76,6 +76,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
       'options' => ['limit' => 0],
       'api.Contact.get' => ['return' => "display_name"],
     ]);
+
     if ($staff['count'] > 0) {
       foreach ($staff['values'] as $ind) {
         $details[$ind['api.Contact.get']['values'][0]['contact_id']] = $ind['api.Contact.get']['values'][0]['display_name'];
@@ -175,8 +176,8 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'operatorType' => CRM_Report_Form::OP_SELECT,
             'options' => ['0' => ts('No'), '1' => ts('Yes')],
           ],
-          'staff_assignee' => [
-            'name' => 'staff_assignee',
+          'staffassignee' => [
+            'name' => 'staffassignee',
             'title' => ts('Assignee'),
             'type' => CRM_Utils_Type::T_INT,
             'operatorType' => CRM_Report_Form::OP_MULTISELECT,
@@ -594,9 +595,10 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             }
           }
 
-          if ($field['name'] == 'staff_assignee' && !empty($this->_params['staff_assignee_value'])) {
+          if ($field['name'] == 'staffassignee' && !empty($this->_params['staffassignee_value'])) {
+            $op = $this->getSQLOperator($this->_params['staffassignee_op']);
             $clause = sprintf("{$this->_aliases['civicrm_activity_contact']}.activity_id IN
-                       (SELECT activity_id FROM civicrm_activity_contact WHERE contact_id IN (%s) AND record_type_id = 1 )", implode(', ', $this->_params['staff_assignee_value']));
+                       (SELECT activity_id FROM civicrm_activity_contact WHERE contact_id $op (%s) AND record_type_id = 1 )", implode(', ', $this->_params['staffassignee_value']));
           }
           if ($field['name'] == 'current_user') {
             if (CRM_Utils_Array::value("{$fieldName}_value", $this->_params) ==
