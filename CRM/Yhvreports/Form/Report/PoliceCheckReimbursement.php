@@ -6,6 +6,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
 
   public function __construct() {
     parent::__construct();
+    $this->_columns['civicrm_activity']['fields']['duration']['title'] = ts('Volunteer Hours');
     $this->_columns['civicrm_activity']['filters']['duration'] = [
       'title' => E::ts('Volunteer Hours'),
       'dbAlias' => 'civicrm_activity_duration_total',
@@ -19,20 +20,20 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     $this->_columns['civicrm_activity']['filters']['status_id']['title'] = ts('Volunteer Status');
     $this->_columns['civicrm_activity']['filters']['police_check_status_id'] = [
       'title' => ts('Police Check Activity Status'),
-      'dbAlias' => 'temp_police_check.status_id',
+      'dbAlias' => 'police_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
       'operatorType' => CRM_Report_Form::OP_MULTISELECT,
       'options' => CRM_Core_PseudoConstant::activityStatus(),
     ];
-    $this->_columns['civicrm_activity']['filters']['rem_tb_check_status_id'] = [
+    $this->_columns['civicrm_activity']['filters']['rem_police_check_status_id'] = [
       'title' => ts('Police Check Reimbursement Activity Status'),
-      'dbAlias' => 'temp_rem_police_check.status_id',
+      'dbAlias' => 'rem_police_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
       'operatorType' => CRM_Report_Form::OP_MULTISELECT,
       'options' => CRM_Core_PseudoConstant::activityStatus(),
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
-    $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
+    $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
     foreach ([
       'civicrm_value_volunteering_12',
       'civicrm_value_volunteer_awa_11',
@@ -100,6 +101,18 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
     $assigneeID = CRM_Utils_Array::key('Activity Assignees', $activityContacts);
     $targetID = CRM_Utils_Array::key('Activity Targets', $activityContacts);
     $sourceID = CRM_Utils_Array::key('Activity Source', $activityContacts);
+    $policeCheckStatusClause = $this->whereClause(
+      $this->_columns['civicrm_activity']['filters']['police_check_status_id'],
+      CRM_Utils_Array::value("police_check_status_id_op", $this->_params),
+      CRM_Utils_Array::value("police_check_status_id_value", $this->_params, [2]),
+      NULL, NULL
+    );
+    $policeRemCheckStatusClause = $this->whereClause(
+      $this->_columns['civicrm_activity']['filters']['rem_police_check_status_id'],
+      CRM_Utils_Array::value("police_check_status_id_op", $this->_params),
+      CRM_Utils_Array::value("police_check_status_id_value", $this->_params, [2]),
+      NULL, NULL
+    );
 
     $this->_from = "
         FROM civicrm_activity {$this->_aliases['civicrm_activity']}
@@ -124,7 +137,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                  FROM civicrm_activity as rem_police_check
                  LEFT JOIN civicrm_activity_contact target_activity
                         ON rem_police_check.id = target_activity.activity_id AND
-                        target_activity.record_type_id = {$targetID} AND rem_police_check.activity_type_id = 57
+                        target_activity.record_type_id = {$targetID} AND {$policeRemCheckStatusClause} AND rem_police_check.activity_type_id = 57
                   GROUP BY target_activity.contact_id
              ) temp_rem_police_check ON temp_rem_police_check.contact_id = contact_civireport.id AND temp_rem_police_check.contact_id IS NULL
              INNER JOIN (
@@ -132,7 +145,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                 FROM civicrm_activity as police_check
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON police_check.id = target_activity.activity_id AND
-                       target_activity.record_type_id = {$targetID} AND police_check.activity_type_id = 62
+                       target_activity.record_type_id = {$targetID} AND {$policeCheckStatusClause} AND police_check.activity_type_id = 62
                  GROUP BY target_activity.contact_id
                  ) temp_police_check ON temp_police_check.contact_id = contact_civireport.id
              {$this->_aclFrom}
@@ -202,7 +215,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
             $clause = $this->dateClause($field['dbAlias'], $relative, $from, $to, $field['type']);
           }
           else {
-            if ($fieldName == 'duration') {
+            if (in_array($fieldName, ['duration', 'police_check_status_id', 'rem_police_check_status_id'])) {
               continue;
             }
             $op = $this->_params["{$fieldName}_op"] ?? NULL;
