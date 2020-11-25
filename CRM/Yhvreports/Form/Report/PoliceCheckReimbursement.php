@@ -16,6 +16,21 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
       'title' => ts('Police Check Date'),
       'dbAlias' => 'MAX(activity_civireport.activity_date_time)',
     ];
+    $this->_columns['civicrm_activity']['filters']['status_id']['title'] = ts('Volunteer Status');
+    $this->_columns['civicrm_activity']['filters']['police_check_status_id'] = [
+      'title' => ts('Police Check Activity Status'),
+      'dbAlias' => 'temp_police_check.status_id',
+      'type' => CRM_Utils_Type::T_STRING,
+      'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+      'options' => CRM_Core_PseudoConstant::activityStatus(),
+    ];
+    $this->_columns['civicrm_activity']['filters']['rem_tb_check_status_id'] = [
+      'title' => ts('Police Check Reimbursement Activity Status'),
+      'dbAlias' => 'temp_rem_police_check.status_id',
+      'type' => CRM_Utils_Type::T_STRING,
+      'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+      'options' => CRM_Core_PseudoConstant::activityStatus(),
+    ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
     $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
     foreach ([
@@ -109,17 +124,17 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                  FROM civicrm_activity as rem_police_check
                  LEFT JOIN civicrm_activity_contact target_activity
                         ON rem_police_check.id = target_activity.activity_id AND
-                        target_activity.record_type_id = {$targetID} AND rem_police_check.status_id IN ('2') AND rem_police_check.activity_type_id = 57
+                        target_activity.record_type_id = {$targetID} AND rem_police_check.activity_type_id = 57
                   GROUP BY target_activity.contact_id
-             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
+             ) temp_rem_police_check ON temp_rem_police_check.contact_id = contact_civireport.id AND temp_rem_police_check.contact_id IS NULL
              INNER JOIN (
                SELECT target_activity.contact_id
-                FROM civicrm_activity as volunteer
+                FROM civicrm_activity as police_check
                 LEFT JOIN civicrm_activity_contact target_activity
-                       ON volunteer.id = target_activity.activity_id AND
-                          target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
+                       ON police_check.id = target_activity.activity_id AND
+                       target_activity.record_type_id = {$targetID} AND police_check.activity_type_id = 62
                  GROUP BY target_activity.contact_id
-             ) temp_volunteer ON temp_volunteer.contact_id = contact_civireport.id
+                 ) temp_police_check ON temp_police_check.contact_id = contact_civireport.id
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
                     ON ( {$this->_aliases['civicrm_activity']}.activity_type_id = civicrm_option_value.value )
