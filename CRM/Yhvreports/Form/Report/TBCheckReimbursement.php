@@ -12,15 +12,15 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['status_id']['title'] = ts('Volunteer Status');
-    $this->_columns['civicrm_activity']['tb_check_status_id'] = [
+    $this->_columns['civicrm_activity']['fields']['status_id']['title'] = ts('Volunteer Status');
+    $this->_columns['civicrm_activity']['fields']['tb_check_status_id'] = [
       'title' => ts('TB Check Activity Status'),
       'dbAlias' => 'temp_tb_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
       'operatorType' => CRM_Report_Form::OP_MULTISELECT,
       'options' => CRM_Core_PseudoConstant::activityStatus(),
     ];
-    $this->_columns['civicrm_activity']['rem_tb_check_status_id'] = [
+    $this->_columns['civicrm_activity']['fields']['rem_tb_check_status_id'] = [
       'title' => ts('TB Check Activity Status'),
       'dbAlias' => 'temp_rem_tb_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
@@ -31,6 +31,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
     $this->_columns['civicrm_activity']['fields']['tb_check_date'] = [
       'title' => E::ts('TB Check Date'),
       'dbAlias' => 'temp_tb_check.tb_check_date',
+      'type' => CRM_Utils_Type::T_TIMESTAMP,
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
     $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
