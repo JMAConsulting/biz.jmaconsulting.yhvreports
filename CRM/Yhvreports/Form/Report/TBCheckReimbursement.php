@@ -12,16 +12,16 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
-    $this->_columns['civicrm_activity']['fields']['status_id']['title'] = ts('Volunteer Status');
-    $this->_columns['civicrm_activity']['fields']['tb_check_status_id'] = [
+    $this->_columns['civicrm_activity']['filters']['status_id']['title'] = ts('Volunteer Status');
+    $this->_columns['civicrm_activity']['filters']['tb_check_status_id'] = [
       'title' => ts('TB Check Activity Status'),
       'dbAlias' => 'temp_tb_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
       'operatorType' => CRM_Report_Form::OP_MULTISELECT,
       'options' => CRM_Core_PseudoConstant::activityStatus(),
     ];
-    $this->_columns['civicrm_activity']['fields']['rem_tb_check_status_id'] = [
-      'title' => ts('TB Check Activity Status'),
+    $this->_columns['civicrm_activity']['filters']['rem_tb_check_status_id'] = [
+      'title' => ts('TB Check Reimbursement Activity Status'),
       'dbAlias' => 'temp_rem_tb_check.status_id',
       'type' => CRM_Utils_Type::T_STRING,
       'operatorType' => CRM_Report_Form::OP_MULTISELECT,
