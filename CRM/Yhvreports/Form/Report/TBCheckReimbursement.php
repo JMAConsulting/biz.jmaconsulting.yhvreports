@@ -12,10 +12,25 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
       'operatorType' => CRM_Report_Form::OP_INT,
       'type' => CRM_Utils_Type::T_INT,
     ];
+    $this->_columns['civicrm_activity']['status_id']['title'] = ts('Volunteer Status');
+    $this->_columns['civicrm_activity']['tb_check_status_id'] = [
+      'title' => ts('TB Check Activity Status'),
+      'dbAlias' => 'temp_tb_check.status_id',
+      'type' => CRM_Utils_Type::T_STRING,
+      'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+      'options' => CRM_Core_PseudoConstant::activityStatus(),
+    ];
+    $this->_columns['civicrm_activity']['rem_tb_check_status_id'] = [
+      'title' => ts('TB Check Activity Status'),
+      'dbAlias' => 'temp_rem_tb_check.status_id',
+      'type' => CRM_Utils_Type::T_STRING,
+      'operatorType' => CRM_Report_Form::OP_MULTISELECT,
+      'options' => CRM_Core_PseudoConstant::activityStatus(),
+    ];
     $this->_columns['civicrm_activity']['fields']['duration']['title'] = E::ts('Volunteer Hours');
-    $this->_columns['civicrm_activity']['fields']['activity_date_time'] = [
+    $this->_columns['civicrm_activity']['fields']['tb_check_date'] = [
       'title' => E::ts('TB Check Date'),
-      'dbAlias' => 'MAX(activity_civireport.activity_date_time)',
+      'dbAlias' => 'temp_tb_check.tb_check_date',
     ];
     $this->_columns['civicrm_activity']['group_bys']['activity_type_id']['default'] = $this->_columns['civicrm_activity']['group_bys']['status_id']['default'] = FALSE;
     $this->_columns['civicrm_activity']['fields']['activity_type_id']['required'] = $this->_columns['civicrm_activity']['fields']['status_id']['required'] = FALSE;
@@ -72,7 +87,7 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
     ];
     $statistics['counts']['duration'] = [
       'title' => ts('Volunteer Hours'),
-      'value' => round(($totalDuration / 60), 2),
+      'value' => round($totalDuration, 2),
     ];
     return $statistics;
   }
@@ -114,13 +129,13 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
             ) temp_rem_tb_check ON temp_rem_tb_check.contact_id = contact_civireport.id AND temp_rem_tb_check.contact_id IS NULL
 
             INNER JOIN (
-              SELECT target_activity.contact_id
-               FROM civicrm_activity as volunteer
-               LEFT JOIN civicrm_activity_contact target_activity
-                      ON volunteer.id = target_activity.activity_id AND
-                         target_activity.record_type_id = {$targetID} AND volunteer.status_id IN ('2') AND volunteer.activity_type_id = 55
-                GROUP BY target_activity.contact_id
-            ) temp_volunteer ON temp_volunteer.contact_id = contact_civireport.id
+               SELECT target_activity.contact_id, MAX(police_check.activity_date_time) as tb_check_date
+                FROM civicrm_activity as police_check
+                LEFT JOIN civicrm_activity_contact target_activity
+                       ON police_check.id = target_activity.activity_id AND
+                          target_activity.record_type_id = {$targetID} AND police_check.activity_type_id = 63
+                 GROUP BY target_activity.contact_id
+             ) temp_tb_check ON temp_tb_check.contact_id = contact_civireport.id
 
              {$this->_aclFrom}
              LEFT JOIN civicrm_option_value
