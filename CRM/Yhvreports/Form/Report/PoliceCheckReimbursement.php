@@ -137,7 +137,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                  FROM civicrm_activity as rem_police_check
                  LEFT JOIN civicrm_activity_contact target_activity
                         ON rem_police_check.id = target_activity.activity_id AND
-                        target_activity.record_type_id = {$targetID} AND {$policeRemCheckStatusClause} AND rem_police_check.activity_type_id = 57
+                        target_activity.record_type_id = {$targetID} AND {$policeRemCheckStatusClause} AND rem_police_check.activity_type_id = 59
                   GROUP BY target_activity.contact_id
              ) temp_rem_police_check ON temp_rem_police_check.contact_id = contact_civireport.id AND temp_rem_police_check.contact_id IS NULL
              INNER JOIN (
@@ -145,7 +145,7 @@ class CRM_Yhvreports_Form_Report_PoliceCheckReimbursement extends CRM_Report_For
                 FROM civicrm_activity as police_check
                 LEFT JOIN civicrm_activity_contact target_activity
                        ON police_check.id = target_activity.activity_id AND
-                       target_activity.record_type_id = {$targetID} AND {$policeCheckStatusClause} AND police_check.activity_type_id = 59
+                       target_activity.record_type_id = {$targetID} AND {$policeCheckStatusClause} AND police_check.activity_type_id = 64
                  GROUP BY target_activity.contact_id
                  ) temp_police_check ON temp_police_check.contact_id = contact_civireport.id
              {$this->_aclFrom}
