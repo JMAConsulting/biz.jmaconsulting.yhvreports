@@ -77,6 +77,18 @@ function yhvreports_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
   return _yhvreports_civix_civicrm_upgrade($op, $queue);
 }
 
+function yhvreports_civicrm_alterReportVar($type, &$columns, &$form) {
+  if ('CRM_Report_Form_Activity' == get_class($form) && $type == 'rows' && (strstr($_GET['q'], 'instance/51') || strstr($_GET['q'], 'instance/53') || strstr($_GET['q'], 'instance/54'))) {
+    $columnHeaders = [];
+    foreach (['civicrm_contact_contact_target', 'civicrm_value_volunteering_12_custom_59', 'civicrm_value_volunteer_inf_9_custom_101'] as $column) {
+      $columnHeaders[$column] = $form->_columnHeaders[$column];
+      unset($form->_columnHeaders[$column]);
+    }
+    $form->_columnHeaders = array_merge($columnHeaders, $form->_columnHeaders);
+  }
+}
+
+
 /**
  * Implements hook_civicrm_managed().
  *
