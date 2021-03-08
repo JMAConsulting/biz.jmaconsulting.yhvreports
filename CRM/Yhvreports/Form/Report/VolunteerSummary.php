@@ -220,6 +220,10 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
       $this->_select .= ", $clause ";
     }
 
+    CRM_Core_DAO::disableFullGroupByMode();
+    $this->totalRows = CRM_Core_DAO::singleValueQuery("SELECT COUNT(*) FROM ({$this->_select} {$this->_from} {$this->_where} {$this->_groupBy} {$this->_having} {$this->_orderBy}) temp");
+    CRM_Core_DAO::reenableFullGroupByMode();
+
     if ($applyLimit && empty($this->_params['charts'])) {
       $this->limit();
     }
