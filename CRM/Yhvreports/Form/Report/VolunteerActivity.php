@@ -88,7 +88,7 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
       }
       $groupBy = $this->_groupBy;
       foreach ($groupBy as $value) {
-        $this->_where .= " AND ({$value} IS NOT NULL AND {$value} <> '') ";
+        $this->_where .= " AND {$value} IS NOT NULL ";
       }
       $this->_groupBy = "GROUP BY " . implode(', ', $this->_groupBy);
       if (strstr($this->_groupBy, 'value_volunteering_12_civireport') && !strstr($this->_from, 'value_volunteering_12_civireport')) {
