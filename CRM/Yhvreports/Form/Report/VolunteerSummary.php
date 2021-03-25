@@ -56,7 +56,7 @@ class CRM_Yhvreports_Form_Report_VolunteerSummary extends CRM_Report_Form_Activi
     $statistics['counts']['duration'] = [
       'title' => ts('Total Volunteer Hours'),
       'type' => CRM_Utils_Type::T_STRING,
-      'value' => round(($totalDuration / 60), 2),
+      'value' => round($totalDuration, 2),
     ];
     return $statistics;
   }
