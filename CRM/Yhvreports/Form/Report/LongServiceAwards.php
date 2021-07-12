@@ -320,12 +320,12 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
     // build temporary table column names base on column headers of result
     $dbColumns = [];
     foreach ($this->_columnHeaders as $fieldName => $dontCare) {
-      $dbColumns[] = $fieldName . ' VARCHAR(128)';
+      $dbColumns[] = $fieldName . ' TEXT';
     }
 
     // Order by & Section columns not selected for display need to be included in temp table.
     foreach ($unselectedColumns as $alias => $section) {
-      $dbColumns[] = $alias . ' VARCHAR(128)';
+      $dbColumns[] = $alias . ' TEXT';
     }
 
     // create temp table to store main result
