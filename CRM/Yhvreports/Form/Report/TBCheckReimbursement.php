@@ -7,10 +7,10 @@ class CRM_Yhvreports_Form_Report_TBCheckReimbursement extends CRM_Report_Form_Ac
   public function __construct() {
     parent::__construct();
     $this->_columns['civicrm_contact']['fields']['external_identifier'] = [
-      'title' => ts('External identifier'),
+      'title' => ts('External Identifier'),
     ];
     $this->_columns['civicrm_contact']['filters']['external_identifier'] = [
-      'title' => ts('External identifier'),
+      'title' => ts('External Identifier'),
     ];
     $this->_columns['civicrm_activity']['filters']['duration'] = [
       'title' => E::ts('Volunteer Hours'),

@@ -96,7 +96,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'no_repeat' => TRUE,
           ],
           'external_identifier' => [
-            'title' => ts('External identifier'),
+            'title' => ts('External Identifier'),
           ],
           'contact_assignee' => [
             'name' => 'sort_name',
@@ -159,7 +159,7 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'type' => CRM_Report_Form::OP_STRING,
           ],
           'external_identifier' => [
-            'title' => ts('External identifier'),
+            'title' => ts('External Identifier'),
           ],
           'contact_assignee' => [
             'name' => 'sort_name',
