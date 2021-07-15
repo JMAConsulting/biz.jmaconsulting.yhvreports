@@ -10,6 +10,12 @@ class CRM_Yhvreports_Form_Report_VolunteerActivity extends CRM_Report_Form_Activ
 
   public function __construct() {
     parent::__construct();
+    $this->_columns['civicrm_contact']['fields']['external_identifier'] = [
+      'title' => ts('External identifier'),
+    ];
+    $this->_columns['civicrm_contact']['filters']['external_identifier'] = [
+      'title' => ts('External identifier'),
+    ];
     $this->_columns['civicrm_activity']['fields']['volunteers_no'] = [
       'title' => ts('# of Volunteers'),
       'dbAlias' => 'COUNT(target_activity.contact_id)',

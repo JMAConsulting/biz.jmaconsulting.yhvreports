@@ -6,6 +6,12 @@ class CRM_Yhvreports_Form_Report_LongServiceAwards extends CRM_Report_Form_Activ
 
   public function __construct() {
     parent::__construct();
+    $this->_columns['civicrm_contact']['fields']['external_identifier'] = [
+      'title' => ts('External identifier'),
+    ];
+    $this->_columns['civicrm_contact']['filters']['external_identifier'] = [
+      'title' => ts('External identifier'),
+    ];
     $this->_columns['civicrm_address'] = [
       'dao' => 'CRM_Core_DAO_Address',
       'fields' => [
