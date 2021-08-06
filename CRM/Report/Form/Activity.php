@@ -95,6 +95,9 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'alias' => 'civicrm_contact_source',
             'no_repeat' => TRUE,
           ],
+          'external_identifier' => [
+            'title' => ts('External Identifier'),
+          ],
           'contact_assignee' => [
             'name' => 'sort_name',
             'title' => ts('Assignee Name'),
@@ -154,6 +157,9 @@ class CRM_Report_Form_Activity extends CRM_Report_Form {
             'title' => ts('Source Name'),
             'operator' => 'like',
             'type' => CRM_Report_Form::OP_STRING,
+          ],
+          'external_identifier' => [
+            'title' => ts('External Identifier'),
           ],
           'contact_assignee' => [
             'name' => 'sort_name',
